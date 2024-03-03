@@ -108,6 +108,7 @@ describe('Todo API', () => {
       `${baseUrl}/todos/${createdTodoId}`,
       options,
       (res) => {
+        console.log(res.body, createdTodoId);
         expect(res.statusCode).toBe(200);
         done();
       }
@@ -126,6 +127,7 @@ describe('Todo API', () => {
       `${baseUrl}/todos/${createdTodoId}`,
       options,
       (res) => {
+        console.log(res.body, createdTodoId);
         expect(res.statusCode).toBe(200);
         done();
       }
