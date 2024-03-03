@@ -28,10 +28,87 @@
 
   Testing the server - run `npm run test-authenticationServer` command in terminal
  */
-
-const express = require("express")
+const { v4: uuidv4 } = require("uuid");
+const express = require("express");
 const PORT = 3000;
 const app = express();
 // write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
+
+app.use(express.json());
+
+let users = [];
+
+const getuserdata = (req, res) => {
+
+  const {email} = req.headers;
+  const {password} = req.headers;
+
+  const validUser = users.some((user) => user.email === email && user.password === password)
+
+  if(validUser) {
+    const data = users.map((user) => {
+      const { password, id, ...newUser} = user;
+      console.debug(newUser);
+      return newUser;
+    })
+    console.debug(data);
+    res.status(200).send(data);
+  }
+  else{
+    res.status(401).send('Unauthorized');
+  }
+
+}
+
+app.get('/data', getuserdata);
+
+const loginUser = (req, res) => {
+  const userData = req.body;
+
+  try {
+    users.find((user) => {
+      if (
+        user.email === userData.email &&
+        user.password === userData.password
+      ) {
+        res.send(user.id);
+      } else {
+        res.status(401).send("Unauthorized");
+      }
+    });
+  } catch {
+    res.status(400).send("Invalid Data");
+  }
+};
+
+app.post("/login", loginUser);
+
+const authenticateUser = (req, res) => {
+  const userData = req.body;
+  const id = uuidv4();
+
+  try {
+    const userExists = users.some(
+      (element) => element.email === userData.email
+    );
+
+    if (!userExists) {
+      const newData = { ...userData, id: id };
+      users.push(newData);
+      console.log(users);
+      res.status(201).send("Signup successful");
+    } else {
+      res.status(400).send("User Already Exists");
+    }
+  } catch {
+    res.status(401).send("Invalid Data");
+  }
+};
+
+app.post("/signup", authenticateUser);
+
+// app.listen(PORT, () => {
+//   console.log("Server Created");
+// });
 
 module.exports = app;

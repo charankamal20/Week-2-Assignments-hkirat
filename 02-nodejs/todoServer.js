@@ -10,26 +10,26 @@
     Description: Returns a list of all todo items.
     Response: 200 OK with an array of todo items in JSON format.
     Example: GET http://localhost:3000/todos
-    
+
   2.GET /todos/:id - Retrieve a specific todo item by ID
     Description: Returns a specific todo item identified by its ID.
     Response: 200 OK with the todo item in JSON format if found, or 404 Not Found if not found.
     Example: GET http://localhost:3000/todos/123
-    
+
   3. POST /todos - Create a new todo item
     Description: Creates a new todo item.
     Request Body: JSON object representing the todo item.
     Response: 201 Created with the ID of the created todo item in JSON format. eg: {id: 1}
     Example: POST http://localhost:3000/todos
     Request Body: { "title": "Buy groceries", "completed": false, description: "I should buy groceries" }
-    
+
   4. PUT /todos/:id - Update an existing todo item by ID
     Description: Updates an existing todo item identified by its ID.
     Request Body: JSON object representing the updated todo item.
     Response: 200 OK if the todo item was found and updated, or 404 Not Found if not found.
     Example: PUT http://localhost:3000/todos/123
     Request Body: { "title": "Buy groceries", "completed": true }
-    
+
   5. DELETE /todos/:id - Delete a todo item by ID
     Description: Deletes a todo item identified by its ID.
     Response: 200 OK if the todo item was found and deleted, or 404 Not Found if not found.
@@ -39,11 +39,82 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require("express");
+const bodyParser = require("body-parser");
 
 const app = express();
-
 app.use(bodyParser.json());
+
+const todos = [];
+
+app.get("/todos/:id", (req, res) => {
+  const id = req.params.id;
+  const todo = todos.find((todo) => todo.id == id);
+  console.log(id, todo);
+
+  if (todo) {
+    res.status(200).json(todo);
+    return;
+  }
+
+  res.status(404).json({ error: "Todo not found" });
+});
+
+app.put("/todos/:id", (req, res) => {
+  const id = req.params.id;
+  const updatedData = req.body;
+
+  const todoExists = todos.some((todo) => todo.id == id)
+
+  if(!todoExists) {
+      res.status(404).json({ error: "Todo not found" });
+  }
+
+  todos[id - 1] = { ...todos[id - 1], ...updatedData };
+  res.status(200).json(todos[id - 1]);
+});
+
+app.delete("/todos/:id", (req, res) => {
+  const id = req.params.id;
+  const todoExists = todos.some((todo) => todo.id == id);
+
+  if (!todoExists) {
+    res.status(404).json({ error: "Todo not found" });
+  }
+
+  todos.splice(id - 1, 1);
+
+  res.status(200).json({success: "Deleted"});
+});
+
+
+app.post("/todos", (req, res) => {
+  const todo = req.body;
+
+  if (
+    !todo ||
+    typeof todo.title !== "string" ||
+    typeof todo.description !== "string"
+  ) {
+    res.status(400).json({ error: "Invalid request body" });
+    return;
+  }
+
+  const id = todos.length + 1;
+  todos.push({ id, ...todo });
+  res.status(201).json({ id: id });
+});
+
+app.get("/todos", (req, res) => {
+  if (todos.length) {
+    res.status(200).json(todos);
+  }
+
+  res.status(401).json({ errror: "Empty array" });
+});
+
+// app.listen(3000, () => {
+//   console.log("Server is running on port 3000");
+// });
 
 module.exports = app;

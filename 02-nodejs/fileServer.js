@@ -20,6 +20,41 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
+const bodyParser = require("body-parser");
+
+app.use(bodyParser.json());
+
+
+app.get('/files', (req, res) => {
+  console.log(__dirname);
+
+  fs.readdir(path.join(__dirname, "./files/"), (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to retrive files" });
+    }
+    res.json(files);
+  });
+})
+
+
+
+app.get('/file/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filepath = path.join('./files/', filename);
+
+  if(fs.existsSync(filepath)) {
+    const fileData = fs.readFileSync(filepath, 'utf-8');
+    res.status(200).send(fileData);
+  }
+
+  res.status(404).send("File not found");
+
+})
+
+app.get("/*", (req, res) => {
+  res.status(404).send("Route not found");
+});
+
 
 
 module.exports = app;
