@@ -52,7 +52,7 @@ const getuserdata = (req, res) => {
       return newUser;
     })
     console.debug(data);
-    res.status(200).send(data);
+    res.status(200).send({users: data});
   }
   else{
     res.status(401).send('Unauthorized');
@@ -71,7 +71,7 @@ const loginUser = (req, res) => {
         user.email === userData.email &&
         user.password === userData.password
       ) {
-        res.send(user.id);
+        res.send(user);
       } else {
         res.status(401).send("Unauthorized");
       }

@@ -26,8 +26,6 @@ app.use(bodyParser.json());
 
 
 app.get('/files', (req, res) => {
-  console.log(__dirname);
-
   fs.readdir(path.join(__dirname, "./files/"), (err, files) => {
     if (err) {
       return res.status(500).json({ error: "Failed to retrive files" });
